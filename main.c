@@ -36,7 +36,10 @@ static int init_graphics(SDL_Renderer **r)
 		return 1;
 	}
 
-	font = TTF_OpenFont("FreeMono.ttf", 14);
+	font = TTF_OpenFont("FreeMono.ttf", 16);
+
+	SDL_SetWindowTitle(window,
+			"My Gameboy");
 
 	return 0;
 }
@@ -47,10 +50,12 @@ static void destroy_graphics(SDL_Renderer *renderer)
 	SDL_Quit();
 }
 
-static void render_text(SDL_Renderer *renderer, const char *strings, int x, int y)
+static void render_text(SDL_Renderer *renderer, const char *strings, int x, int y, int w, int h)
 {
 	/* Font color */
 	SDL_Color text_color = { 255, 255, 255 };
+	/* Font geometry */
+	SDL_Rect dstrect = {0};
 	SDL_Surface *message = NULL;
 	SDL_Texture *texture = NULL;
 
@@ -60,24 +65,49 @@ static void render_text(SDL_Renderer *renderer, const char *strings, int x, int 
 		return;
 	}
 
+	dstrect.x = x;
+	dstrect.y = y;
+	dstrect.w = w;
+	dstrect.h = h;
+
 	texture = SDL_CreateTextureFromSurface(renderer, message);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 	SDL_DestroyTexture(texture);
 	SDL_FreeSurface(message);
 }
 
 static void render_graphics(SDL_Renderer *renderer)
 {
-	render_text(renderer, "wang da shan shi sha bi", 0, 0);
 	SDL_RenderPresent(renderer);
+	SDL_RenderClear(renderer);
 }
 
-static int poll_event()
+static int poll_event(SDL_Renderer *renderer)
 {
 	SDL_Event event;
 	SDL_PollEvent(&event);
-	if(event.type == SDL_QUIT)
+	if (event.type == SDL_QUIT)
 		return 1;
+
+	const Uint8 *state = SDL_GetKeyboardState(NULL);
+
+	if (state[SDL_SCANCODE_A]) {
+		render_text(renderer, "Left", 790, 20, 30, 30);
+	}
+
+	if (state[SDL_SCANCODE_S]) {
+		render_text(renderer, "Down", 800, 40, 30, 30);
+	}
+
+	if (state[SDL_SCANCODE_D]) {
+		render_text(renderer, "Right", 820, 20, 40, 30);
+	}
+
+	if (state[SDL_SCANCODE_W]) {
+		render_text(renderer, "Up", 800, 0, 30, 30);
+	}
+
+	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -94,7 +124,7 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		if (poll_event() == 1) {
+		if (poll_event(renderer) == 1) {
 			break;
 		}
 
