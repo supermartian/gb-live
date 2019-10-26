@@ -5,8 +5,12 @@
  * Distributed under terms of the MIT license.
  */
 
+#include <stdio.h>
+
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
+
+TTF_Font *font = NULL;
 
 static int init_graphics(SDL_Renderer **r)
 {
@@ -27,6 +31,13 @@ static int init_graphics(SDL_Renderer **r)
 	renderer = SDL_CreateRenderer(window, -1, 0);
 
 	*r = renderer;
+
+	if (TTF_Init() == -1) {
+		return 1;
+	}
+
+	font = TTF_OpenFont("FreeMono.ttf", 14);
+
 	return 0;
 }
 
@@ -36,8 +47,28 @@ static void destroy_graphics(SDL_Renderer *renderer)
 	SDL_Quit();
 }
 
+static void render_text(SDL_Renderer *renderer, const char *strings, int x, int y)
+{
+	/* Font color */
+	SDL_Color text_color = { 255, 255, 255 };
+	SDL_Surface *message = NULL;
+	SDL_Texture *texture = NULL;
+
+	message = TTF_RenderText_Solid(font, strings, text_color);
+	if (message == NULL) {
+		printf("invalid TTF\n");
+		return;
+	}
+
+	texture = SDL_CreateTextureFromSurface(renderer, message);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_DestroyTexture(texture);
+	SDL_FreeSurface(message);
+}
+
 static void render_graphics(SDL_Renderer *renderer)
 {
+	render_text(renderer, "wang da shan shi sha bi", 0, 0);
 	SDL_RenderPresent(renderer);
 }
 

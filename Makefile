@@ -6,6 +6,7 @@
 
 CFLAGS = $(shell sdl2-config --cflags)
 LDFLAGS = $(shell sdl2-config --static-libs)
+LDFLAGS += -lSDL2_ttf
 
 SOURCES = main.c
 OBJS = $(patsubst %.c,%.o,$(SOURCES))
@@ -19,4 +20,4 @@ clean:
 	rm -rf $(OBJS) main
 
 .PHONY:
-	clean
+	all clean
