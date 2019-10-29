@@ -196,7 +196,6 @@ int main(int argc, char *argv[])
 	}
 
 	gb_instance = malloc(sizeof(struct gb));
-	gb_init(gb_instance);
 
 	gb_sdl_renderer.render = gb_SDL_render;
 	gb_sdl_renderer.aux = gb_SDL_Renderer;
@@ -216,6 +215,7 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
+	gb_init(gb_instance);
 	/* Main event loop */
 	while (1) {
 		if (poll_event(gb_SDL_Renderer, &gb_event) == 1) {
