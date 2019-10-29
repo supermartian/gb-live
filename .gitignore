@@ -1,4 +1,6 @@
 main
 gb_sdl
+test_rom
+test_rom/*
 *.o
 *.swp
