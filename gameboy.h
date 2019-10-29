@@ -42,6 +42,7 @@ struct gb {
 	struct gb_interface interface;
 	/* Emulation of the hardware */
 	struct gb_hardware hardware;
+	unsigned char *gb_rom;
 };
 
 int gb_init(struct gb *gb_instance);

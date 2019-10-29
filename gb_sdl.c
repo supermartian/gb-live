@@ -8,6 +8,11 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+
 #include "gameboy.h"
 #include "sdl_renderer.h"
 
@@ -179,6 +184,8 @@ int main(int argc, char *argv[])
 	struct gb *gb_instance;
 	struct gb_event gb_event;
 	struct gb_renderer gb_sdl_renderer;
+	int rom_fd;
+	struct stat rom_stat;
 
 	if (init_graphics(&gb_SDL_Renderer)) {
 		return 1;
@@ -195,6 +202,21 @@ int main(int argc, char *argv[])
 	gb_sdl_renderer.aux = gb_SDL_Renderer;
 	gb_instance->interface.renderer = &gb_sdl_renderer;
 
+	rom_fd = open(argv[1], O_RDONLY);
+	if (rom_fd <= 0) {
+		printf("Unable to open rom %s\n", argv[1]);
+		goto out;
+	}
+
+	fstat(rom_fd, &rom_stat);
+	printf("Rom size: %lu\n", (uint64_t)rom_stat.st_size);
+	gb_instance->gb_rom = mmap(NULL, rom_stat.st_size, PROT_WRITE, MAP_PRIVATE, rom_fd, 0);
+	if (gb_instance->gb_rom == MAP_FAILED) {
+		printf("Unable to load rom into memory\n");
+		goto out;
+	}
+
+	/* Main event loop */
 	while (1) {
 		if (poll_event(gb_SDL_Renderer, &gb_event) == 1) {
 			break;
@@ -206,6 +228,8 @@ int main(int argc, char *argv[])
 		gb_render(gb_instance);
 	}
 
+	munmap(gb_instance->gb_rom, rom_stat.st_size);
+out:
 	destroy_graphics(gb_SDL_Renderer);
 	gb_destroy(gb_instance);
 	free(gb_instance);
