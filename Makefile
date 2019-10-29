@@ -5,19 +5,24 @@
 #
 
 CFLAGS = $(shell sdl2-config --cflags)
+CFLAGS += -DRENDERER_SDL2
 LDFLAGS = $(shell sdl2-config --static-libs)
 LDFLAGS += -lSDL2_ttf
 
-SOURCES = main.c
+SOURCES = gameboy.c gb_sdl.c
 OBJS = $(patsubst %.c,%.o,$(SOURCES))
+
+TARGET = gb-live
 
 $(OBJS): $(SOURCES)
 
 all: $(OBJS)
-	$(CC) $(OBJS) -o main $(LDFLAGS)
+	$(CC) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 clean:
-	rm -rf $(OBJS) main
+	rm -rf $(OBJS) $(TARGET)
 
 .PHONY:
 	all clean
+
+.DEFAULT_GOAL := all
